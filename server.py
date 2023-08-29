@@ -1,4 +1,5 @@
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, Blueprint
+
 import xarray as xr
 import numpy as np
 
@@ -6,11 +7,13 @@ from scipy.stats import scoreatpercentile, percentileofscore
 
 import glob
 
+bp = Blueprint('sushi-server', __name__, template_folder='templates')
+
 MONTH_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 
 app = Flask(__name__)
 
-@app.route("/sushi-server/dataset/<collection>/<dataset>/<varname>/<feature_id>/")
+@bp.route("/dataset/<collection>/<dataset>/<varname>/<feature_id>/")
 def dataset_timeseries(collection, dataset, varname, feature_id):
 
     timeagg = request.args.get('timeagg')
@@ -125,7 +128,7 @@ def dataset_timeseries(collection, dataset, varname, feature_id):
 
 
 
-@app.route("/sushi-server/forecast/seasonal/<model>/<fcst_year>/<fcst_month>/<varname>/<feature_id>/")
+@bp.route("/forecast/seasonal/<model>/<fcst_year>/<fcst_month>/<varname>/<feature_id>/")
 def forecast(model, fcst_year, fcst_month, varname, feature_id):
 
     lead = request.args.get('lead')
@@ -330,3 +333,6 @@ def forecast(model, fcst_year, fcst_month, varname, feature_id):
 
 
     return (response, headers)
+
+
+app.register_blueprint(bp, url_prefix='/sushi-server')
